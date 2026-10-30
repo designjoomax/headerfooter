@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Header & Footer Joomax</title>
+<link rel="icon" href="assets/logo/icon-red.png">
+<style>
+  :root{--bg:#fff;--ink:#141416;--muted:#6d6d76;--code:#f6f6f7;--line:#e6e6ea}
+  @media (prefers-color-scheme:dark){:root{--bg:#0f0f12;--ink:#f3f3f5;--muted:#9a9aa3;--code:#17171b;--line:#2c2c33}}
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  main{width:min(820px,calc(100% - 40px));margin:0 auto;padding:56px 0 80px}
+  h1{margin:0 0 8px;font-size:clamp(1.8rem,4vw,2.4rem);line-height:1.2}
+  h2{margin:40px 0 8px;font-size:1.15rem}
+  p{margin:0 0 12px;color:var(--muted)}
+  pre{margin:0 0 12px;padding:16px;overflow-x:auto;border-radius:12px;background:var(--code);border:1px solid var(--line);font:13px/1.6 ui-monospace,Menlo,Consolas,monospace;color:var(--ink)}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+  joomax-header:not(:defined){display:block;min-height:72px}
+</style>
+</head>
+<body>
+<joomax-header sticky></joomax-header>
+
+<main>
+  <h1>Header & Footer Joomax</h1>
+  <p>Komponen header dan footer yang dipakai bersama semua website Joomax. Halaman ini memakainya sendiri: header di atas, footer di bawah.</p>
+
+  <h2>Pasang di website mana pun</h2>
+<pre>&lt;joomax-header sticky&gt;&lt;/joomax-header&gt;
+
+  ...isi halaman...
+
+&lt;joomax-footer&gt;&lt;/joomax-footer&gt;
+
+&lt;script src="https://designjoomax.github.io/headerfooter/joomax-layout.config.js"&gt;&lt;/script&gt;
+&lt;script src="https://designjoomax.github.io/headerfooter/joomax-layout.js"&gt;&lt;/script&gt;</pre>
+
+  <h2>Ubah menu dan footer untuk semua website sekaligus</h2>
+  <p>Edit <code>joomax-layout.config.js</code>. Link sementara memakai <code>"#"</code>, ganti dengan link asli kalau halamannya sudah jadi.</p>
+
+  <h2>Warna dan ukuran lewat CSS website</h2>
+<pre>:root{
+  --jx-accent:#e60020;        /* aksen mode terang */
+  --jx-accent-dark:#ff3d55;   /* aksen mode gelap */
+  --jx-font:"Poppins",sans-serif;
+  --jx-max:1500px;            /* lebar isi header */
+  --jx-footer-max:1260px;     /* lebar isi footer */
+}</pre>
+  <p>Atribut: <code>&lt;joomax-header sticky theme="light|dark"&gt;</code>. Tanpa <code>theme</code>, header ikut mode terang/gelap website.</p>
+</main>
+
+<joomax-footer></joomax-footer>
+
+<script src="joomax-layout.config.js"></script>
+<script src="joomax-layout.js"></script>
+</body>
+</html>
