@@ -12,14 +12,14 @@ window.JOOMAX_LAYOUT = window.JOOMAX_LAYOUT || (() => {
 
     // Menu: item tanpa "children" = link biasa, dengan "children" = dropdown.
     nav: [
-      { label: "Home", href: WELCOME },
+      { label: "Home", href:"https://designjoomax.github.io/home/"},
       { label: "Workspace", children: [
         { label: "Jadwal Kerja", href: T },
         { label: "Jadwal Piket", href: T },
         { label: "Pengajuan Izin", href: T }
       ]},
       { label: "Creative", children: [
-        { label: "Image to Frame", href: "https://github.com/designjoomax/imagetoframe" },
+        { label: "Image to Frame", href: "https://designjoomax.github.io/imagetoframe/" },
         { label: "Generate", href: "https://github.com/designjoomax/generate" },
         { label: "Tools", href: "https://github.com/designjoomax/tools" }
       ]},
