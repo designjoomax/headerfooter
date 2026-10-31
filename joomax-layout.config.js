@@ -44,9 +44,9 @@
         { label: "Pengajuan Izin", desc: "Ajukan izin dan sakit",      href: LINK.izin }
       ]},
       { id: "creative", label: "Creative", children: [
-        { label: "Image to Frame", desc: "Pasang frame Joomax ke foto", href: LINK.frame },
-        { label: "Generate",       desc: "Buat gambar produk marketplace", href: LINK.generate },
-        { label: "Tools",          desc: "Alat bantu kreatif",          href: LINK.tools }
+        { label: "Image to Frame", desc: "Pasang frame Joomax ke foto", href: "https://designjoomax.github.io/imagetoframe/" },
+        { label: "Generate",       desc: "Buat gambar produk marketplace", href: "https://designjoomax.github.io/generate/" },
+        { label: "Tools",          desc: "Alat bantu kreatif",          href: "https://designjoomax.github.io/tools/" }
       ]},
       { id: "gallery", label: "Gallery", children: [
         { label: "Dokumentasi", desc: "Foto kegiatan dan momen kantor", href: LINK.gallery },
@@ -63,19 +63,19 @@
         { title: "Company", links: [
           { label: "About Us", href: LINK.about },
           { label: "Our Team", href: LINK.team },
-          { label: "Gallery",  href: LINK.gallery },
+          { label: "Gallery",  href: "https://designjoomax.github.io/gallery/" },
           { label: "Contact",  href: LINK.contact }
         ]},
         { title: "Workspace", links: [
-          { label: "Jadwal Kerja",    href: LINK.kerja },
-          { label: "Jadwal Piket",    href: LINK.piket },
-          { label: "Pengajuan Izin",  href: LINK.izin },
+          { label: "Jadwal Kerja",    href: "https://docs.google.com/spreadsheets/d/1OEg0_ey3srgomeU1Q1JEdI0h3PW93zb-mxHVxdZiuuY/edit?pli=1&gid=982571310#gid=982571310"},
+          { label: "Jadwal Piket",    href: "https://docs.google.com/spreadsheets/d/1mXOwBjsoVrU3rJr9XWO6LnKoIOMe2PHVvUV5hc0y5Po/edit?gid=472399028#gid=472399028" },
+          { label: "Pengajuan Izin",  href: "https://forms.gle/SETnE5LfT6avQ5Q39" },
           { label: "Resource Center", href: LINK.resource }
         ]},
         { title: "Creative", links: [
-          { label: "Image to Frame", href: LINK.frame },
-          { label: "Generate",       href: LINK.generate },
-          { label: "Tools",          href: LINK.tools }
+          { label: "Image to Frame", href: "https://designjoomax.github.io/imagetoframe/" },
+          { label: "Generate",       href: "https://designjoomax.github.io/generate/" },
+          { label: "Tools",          href: "https://designjoomax.github.io/tools/" }
         ]},
         { title: "Information", links: [
           { label: "Privacy Policy", href: LINK.privacy },
@@ -91,9 +91,9 @@
       // Ikon di kanan bawah. icon: mail | globe | instagram | youtube | whatsapp | linkedin
       // Ganti "#" dengan link asli (email: "mailto:nama@domain.com")
       social: [
-        { label: "Email",     icon: "mail",      href: "#" },
-        { label: "Website",   icon: "globe",     href: "#" },
-        { label: "Instagram", icon: "instagram", href: "#" }
+        { label: "Email",     icon: "mail",      href: "mailto:cs@joomax.id" },
+        { label: "Website",   icon: "globe",     href: "https://joomax.id" },
+        { label: "Instagram", icon: "instagram", href: "#" active:false}
       ],
 
       // Pemilih negara. Hapus isinya ([]) kalau tidak dipakai.
