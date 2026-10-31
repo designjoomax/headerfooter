@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Header & Footer Joomax</title>
+<link rel="icon" href="assets/icon-red.png">
+<style>
+  :root{--bg:#fff;--ink:#141416;--mut:#6b6b75;--code:#f6f6f8;--line:#e8e8ec;box-sizing:border-box}
+  *,*::before,*::after{box-sizing:inherit}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  main{width:min(840px,calc(100% - 40px));margin:0 auto;padding:56px 0 80px}
+  h1{margin:0 0 8px;font-size:clamp(1.9rem,4vw,2.5rem);line-height:1.15;letter-spacing:-.02em}
+  h2{margin:44px 0 8px;font-size:1.15rem}
+  p{margin:0 0 12px;color:var(--mut)}
+  pre{margin:0 0 12px;padding:16px 18px;overflow-x:auto;border-radius:14px;background:var(--code);border:1px solid var(--line);font:13px/1.65 ui-monospace,Menlo,Consolas,monospace;color:var(--ink)}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+  joomax-header:not(:defined){display:block;min-height:67px}
+</style>
+</head>
+<body>
+<joomax-header sticky></joomax-header>
+
+<main>
+  <h1>Header & Footer Joomax</h1>
+  <p>Komponen header dan footer yang dipakai bersama semua website Joomax. Halaman ini memakainya sendiri: coba hover menu di atas, gulir halaman, dan buka hamburger di kanan.</p>
+
+  <h2>Pasang di website mana pun</h2>
+<pre>&lt;joomax-header sticky current="home"&gt;&lt;/joomax-header&gt;
+
+  ...isi halaman...
+
+&lt;joomax-footer&gt;&lt;/joomax-footer&gt;
+
+&lt;script src="https://designjoomax.github.io/headerfooter/joomax-layout.config.js"&gt;&lt;/script&gt;
+&lt;script src="https://designjoomax.github.io/headerfooter/joomax-layout.js"&gt;&lt;/script&gt;</pre>
+  <p><code>current</code> menandai menu yang sedang aktif. Isinya <code>id</code> menu di config (<code>home</code>, <code>workspace</code>, <code>creative</code>, <code>gallery</code>). Tanpa atribut ini, halaman aktif dideteksi otomatis dari URL.</p>
+
+  <h2>Mengubah menu dan footer</h2>
+  <p>Edit <code>joomax-layout.config.js</code>. Semua link ditulis sekali di blok <code>LINK</code>, lalu dipakai di header dan footer.</p>
+<pre>nav: [
+  { id: "home", label: "Home", href: LINK.home },
+  { id: "workspace", label: "Workspace", children: [
+    { label: "Jadwal Kerja", desc: "Lihat jadwal kerja tim", href: LINK.kerja }
+  ]}
+]</pre>
+  <p><code>href: "#"</code> = link sementara. Item dengan <code>children</code> menjadi dropdown.</p>
+
+  <h2>Isi berbeda untuk satu website</h2>
+  <p>Definisikan <code>window.JOOMAX_LAYOUT</code> sebelum script. Kalau sudah ada, config pusat tidak menimpanya, jadi muat <code>joomax-layout.js</code> saja.</p>
+
+  <h2>Warna dan ukuran lewat CSS website</h2>
+<pre>:root{
+  --jx-accent:#e60020;        /* aksen mode terang */
+  --jx-accent-dark:#ff3d55;   /* aksen mode gelap */
+  --jx-font:"Poppins",sans-serif;
+  --jx-max:1600px;            /* lebar isi header */
+  --jx-footer-max:1180px;     /* lebar isi footer */
+}</pre>
+  <p>Atribut: <code>sticky</code>, <code>theme="light|dark"</code> (tanpa ini ikut mode terang/gelap website), <code>current="id"</code>.</p>
+  <p style="height:420px"></p>
+</main>
+
+<joomax-footer></joomax-footer>
+
+<script src="joomax-layout.config.js"></script>
+<script src="joomax-layout.js"></script>
+</body>
+</html>
