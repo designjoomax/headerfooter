@@ -91,8 +91,8 @@
       // Ikon di kanan bawah. icon: mail | globe | instagram | youtube | whatsapp | linkedin
       // Ganti "#" dengan link asli (email: "mailto:nama@domain.com")
       social: [
-        { label: "Email",     icon: "mail",      href: "#" },
-        { label: "Website",   icon: "globe",     href: "#" },
+        { label: "Email",     icon: "mail",      href: "mailto:cs@joomax.id" },
+        { label: "Website",   icon: "globe",     href: "https://Joomax.id" },
         { label: "Instagram", icon: "instagram", href: "#" }
       ],
 
