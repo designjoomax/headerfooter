@@ -4,19 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Header & Footer Joomax</title>
-<link rel="icon" href="assets/logo/icon-red.png">
+<link rel="icon" href="assets/icon-red.png">
 <style>
-  :root{--bg:#fff;--ink:#141416;--muted:#6d6d76;--code:#f6f6f7;--line:#e6e6ea}
-  @media (prefers-color-scheme:dark){:root{--bg:#0f0f12;--ink:#f3f3f5;--muted:#9a9aa3;--code:#17171b;--line:#2c2c33}}
-  *,*::before,*::after{box-sizing:border-box}
+  :root{--bg:#fff;--ink:#141416;--mut:#6b6b75;--code:#f6f6f8;--line:#e8e8ec;box-sizing:border-box}
+  *,*::before,*::after{box-sizing:inherit}
   body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-  main{width:min(820px,calc(100% - 40px));margin:0 auto;padding:56px 0 80px}
-  h1{margin:0 0 8px;font-size:clamp(1.8rem,4vw,2.4rem);line-height:1.2}
-  h2{margin:40px 0 8px;font-size:1.15rem}
-  p{margin:0 0 12px;color:var(--muted)}
-  pre{margin:0 0 12px;padding:16px;overflow-x:auto;border-radius:12px;background:var(--code);border:1px solid var(--line);font:13px/1.6 ui-monospace,Menlo,Consolas,monospace;color:var(--ink)}
+  main{width:min(840px,calc(100% - 40px));margin:0 auto;padding:56px 0 80px}
+  h1{margin:0 0 8px;font-size:clamp(1.9rem,4vw,2.5rem);line-height:1.15;letter-spacing:-.02em}
+  h2{margin:44px 0 8px;font-size:1.15rem}
+  p{margin:0 0 12px;color:var(--mut)}
+  pre{margin:0 0 12px;padding:16px 18px;overflow-x:auto;border-radius:14px;background:var(--code);border:1px solid var(--line);font:13px/1.65 ui-monospace,Menlo,Consolas,monospace;color:var(--ink)}
   code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
-  joomax-header:not(:defined){display:block;min-height:72px}
+  joomax-header:not(:defined){display:block;min-height:67px}
 </style>
 </head>
 <body>
@@ -24,10 +23,10 @@
 
 <main>
   <h1>Header & Footer Joomax</h1>
-  <p>Komponen header dan footer yang dipakai bersama semua website Joomax. Halaman ini memakainya sendiri: header di atas, footer di bawah.</p>
+  <p>Komponen header dan footer yang dipakai bersama semua website Joomax. Halaman ini memakainya sendiri: coba hover menu di atas, gulir halaman, dan buka hamburger di kanan.</p>
 
   <h2>Pasang di website mana pun</h2>
-<pre>&lt;joomax-header sticky&gt;&lt;/joomax-header&gt;
+<pre>&lt;joomax-header sticky current="home"&gt;&lt;/joomax-header&gt;
 
   ...isi halaman...
 
@@ -35,19 +34,31 @@
 
 &lt;script src="https://designjoomax.github.io/headerfooter/joomax-layout.config.js"&gt;&lt;/script&gt;
 &lt;script src="https://designjoomax.github.io/headerfooter/joomax-layout.js"&gt;&lt;/script&gt;</pre>
+  <p><code>current</code> menandai menu yang sedang aktif. Isinya <code>id</code> menu di config (<code>home</code>, <code>workspace</code>, <code>creative</code>, <code>gallery</code>). Tanpa atribut ini, halaman aktif dideteksi otomatis dari URL.</p>
 
-  <h2>Ubah menu dan footer untuk semua website sekaligus</h2>
-  <p>Edit <code>joomax-layout.config.js</code>. Link sementara memakai <code>"#"</code>, ganti dengan link asli kalau halamannya sudah jadi.</p>
+  <h2>Mengubah menu dan footer</h2>
+  <p>Edit <code>joomax-layout.config.js</code>. Semua link ditulis sekali di blok <code>LINK</code>, lalu dipakai di header dan footer.</p>
+<pre>nav: [
+  { id: "home", label: "Home", href: LINK.home },
+  { id: "workspace", label: "Workspace", children: [
+    { label: "Jadwal Kerja", desc: "Lihat jadwal kerja tim", href: LINK.kerja }
+  ]}
+]</pre>
+  <p><code>href: "#"</code> = link sementara. Item dengan <code>children</code> menjadi dropdown.</p>
+
+  <h2>Isi berbeda untuk satu website</h2>
+  <p>Definisikan <code>window.JOOMAX_LAYOUT</code> sebelum script. Kalau sudah ada, config pusat tidak menimpanya, jadi muat <code>joomax-layout.js</code> saja.</p>
 
   <h2>Warna dan ukuran lewat CSS website</h2>
 <pre>:root{
   --jx-accent:#e60020;        /* aksen mode terang */
   --jx-accent-dark:#ff3d55;   /* aksen mode gelap */
   --jx-font:"Poppins",sans-serif;
-  --jx-max:1500px;            /* lebar isi header */
-  --jx-footer-max:1260px;     /* lebar isi footer */
+  --jx-max:1600px;            /* lebar isi header */
+  --jx-footer-max:1180px;     /* lebar isi footer */
 }</pre>
-  <p>Atribut: <code>&lt;joomax-header sticky theme="light|dark"&gt;</code>. Tanpa <code>theme</code>, header ikut mode terang/gelap website.</p>
+  <p>Atribut: <code>sticky</code>, <code>theme="light|dark"</code> (tanpa ini ikut mode terang/gelap website), <code>current="id"</code>.</p>
+  <p style="height:420px"></p>
 </main>
 
 <joomax-footer></joomax-footer>
