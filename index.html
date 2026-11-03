@@ -49,6 +49,13 @@
   <h2>Isi berbeda untuk satu website</h2>
   <p>Definisikan <code>window.JOOMAX_LAYOUT</code> sebelum script. Kalau sudah ada, config pusat tidak menimpanya, jadi muat <code>joomax-layout.js</code> saja.</p>
 
+  <h2>Bahasa</h2>
+  <p>Pemilih bahasa di footer menerjemahkan header dan footer: Indonesia, English, 中文, Русский, العربية. Kamusnya ada di <code>i18n.dict</code> pada config. Halaman bisa ikut berganti lewat event:</p>
+<pre>document.addEventListener("joomax:language", (e) =&gt; {
+  console.log(e.detail.code, e.detail.dir);   // "en" "ltr"
+});
+JoomaxLayout.setLanguage("zh");</pre>
+
   <h2>Warna dan ukuran lewat CSS website</h2>
 <pre>:root{
   --jx-accent:#e60020;        /* aksen mode terang */

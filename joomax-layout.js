@@ -13,6 +13,8 @@
  *
  * Atribut <joomax-header>: sticky | theme="light|dark" | current="id-menu"
  * Isi menu/footer: window.JOOMAX_LAYOUT (lihat joomax-layout.config.js)
+ * Bahasa : pemilih bahasa di footer menerjemahkan header + footer (Indonesia, English, 中文, Русский, العربية).
+ *          Kamus ada di config (i18n.dict). Pilihan disimpan di localStorage dan event "joomax:language" dikirim ke halaman.
  * CSS website: --jx-accent --jx-accent-dark --jx-font --jx-max (lebar header) --jx-footer-max
  */
 (() => {
@@ -29,11 +31,12 @@
     brand: { name: "Joomax Teknologi Indonesia", href: "./", mark: BASE + "assets/icon-red.png", logo: BASE + "assets/logo.png", logoOnDark: "" },
     nav: [],
     cta: null,
-    footer: { columns: [], social: [], copyright: "© {year} Joomax Teknologi Indonesia. All Rights Reserved.", credit: "", creditHref: "", countries: [] }
+    i18n: { default: "", dict: {} },
+    footer: { columns: [], social: [], copyright: "© {year} Joomax Teknologi Indonesia. All Rights Reserved.", credit: "", creditHref: "", languages: [] }
   };
   const cfg = () => {
     const u = window.JOOMAX_LAYOUT || {};
-    return { ...DEFAULTS, ...u, brand: { ...DEFAULTS.brand, ...(u.brand || {}) }, footer: { ...DEFAULTS.footer, ...(u.footer || {}) } };
+    return { ...DEFAULTS, ...u, brand: { ...DEFAULTS.brand, ...(u.brand || {}) }, footer: { ...DEFAULTS.footer, ...(u.footer || {}) }, i18n: { ...DEFAULTS.i18n, ...(u.i18n || {}) } };
   };
 
   // ---------- Util ----------
@@ -101,6 +104,65 @@
   new MutationObserver(syncModes).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncModes);
 
+
+  // ---------- Bahasa ----------
+  const LS_KEY = "joomax-lang";
+  const RTL = ["ar", "he", "fa", "ur"];
+  const LANG_FONTS = {
+    zh: { css: "family=Noto+Sans+SC:wght@400;500;600;700", stack: '"Noto Sans SC","PingFang SC","Microsoft YaHei"' },
+    ar: { css: "family=Noto+Sans+Arabic:wght@400;500;600;700", stack: '"Noto Sans Arabic","Segoe UI",Tahoma' },
+    ru: { css: "family=Noto+Sans:wght@400;500;600;700", stack: '"Noto Sans","Segoe UI",Roboto' }
+  };
+  const langList = () => { const f = cfg().footer; return f.languages || f.countries || []; };
+  const codeOf = (x) => String((x && x.code) || "").toLowerCase();
+  let LANG = null;
+  const pickLang = () => {
+    const list = langList(), codes = list.map(codeOf);
+    let v = null;
+    try { v = localStorage.getItem(LS_KEY); } catch {}
+    if (v && codes.includes(v)) { document.documentElement.lang = v; return v; }
+    const d = String(cfg().i18n.default || "").toLowerCase();
+    if (d && codes.includes(d)) return d;
+    const sel = list.find((x) => x.selected);
+    return sel ? codeOf(sel) : (codes[0] || "id");
+  };
+  const lang = () => LANG || (LANG = pickLang());
+  const isRTL = () => RTL.includes(lang());
+  // t("teks") -> terjemahan; kalau tidak ada di kamus, teks asli dipakai. Boleh juga objek { id:"..", en:".." }
+  const t = (x) => {
+    if (x == null) return x;
+    if (typeof x === "object") return x[lang()] ?? x.id ?? Object.values(x)[0];
+    const d = (cfg().i18n.dict || {})[lang()];
+    return d && d[x] != null ? d[x] : x;
+  };
+  const trItem = (it) => ({ ...it, label: t(it.label), desc: it.desc != null ? t(it.desc) : it.desc, children: it.children ? it.children.map(trItem) : it.children });
+  const ensureLangFont = (code) => {
+    const f = LANG_FONTS[code], id = "jx-font-" + code;
+    if (!f || document.getElementById(id)) return;
+    document.head.append(h("link", { id, rel: "stylesheet", href: "https://fonts.googleapis.com/css2?" + f.css + "&display=swap" }));
+  };
+  // arah teks, bahasa, dan font untuk bahasa non-Latin
+  const langAttrs = (root, loadFont) => {
+    const code = lang(), f = LANG_FONTS[code];
+    root.setAttribute("dir", isRTL() ? "rtl" : "ltr");
+    root.setAttribute("lang", code);
+    root.style.fontFamily = f ? 'var(--jx-font,"Poppins"),' + f.stack + ",sans-serif" : "";
+    if (f && loadFont) ensureLangFont(code);
+  };
+  const setLang = (code) => {
+    lang();
+    const list = langList(), want = String(code || "").toLowerCase(), item = list.find((x) => codeOf(x) === want);
+    if (!item || want === LANG) return;
+    LANG = want;
+    try { localStorage.setItem(LS_KEY, LANG); } catch {}
+    document.documentElement.lang = LANG;
+    instances.forEach((el) => el.refresh());
+    const detail = { ...item, code: LANG, dir: isRTL() ? "rtl" : "ltr" };
+    document.dispatchEvent(new CustomEvent("joomax:language", { detail }));
+    document.dispatchEvent(new CustomEvent("joomax:country", { detail }));
+  };
+  addEventListener("storage", (e) => { if (e.key === LS_KEY && e.newValue) setLang(e.newValue); });
+
   // ---------- CSS ----------
   const BASE_CSS = `
     *,*::before,*::after{box-sizing:border-box}
@@ -163,7 +225,7 @@
     .dl-t{display:block;min-width:0}
     .dl-t b{display:block;font-size:.9rem;font-weight:600;color:var(--ink)}
     .dl-t .d{display:block;font-size:.78rem;line-height:1.35;color:var(--mut)}
-    .dl .i{margin-left:auto;color:var(--accent);opacity:0;transform:translateX(-8px);transition:opacity .25s ease,transform .4s var(--ease)}
+    .dl .i{margin-inline-start:auto;color:var(--accent);opacity:0;transform:translateX(-8px);transition:opacity .25s ease,transform .4s var(--ease)}
     .dl:hover .i,.dl:focus-visible .i{opacity:1;transform:none}
     .dl[aria-current="page"] .dl-t b{color:var(--accent)}
 
@@ -181,7 +243,7 @@
     .dn{display:flex;flex-direction:column;padding:8px 24px 24px}
     .dn>*{border-bottom:1px solid var(--line);opacity:0;transform:translateX(20px);transition:opacity .3s ease,transform .3s ease}
     .root[data-menu] .dn>*,.root[data-menu] .d-foot{opacity:1;transform:none;transition:opacity .5s ease calc(var(--i,0) * 50ms + 150ms),transform .6s var(--ease) calc(var(--i,0) * 50ms + 150ms)}
-    .d-top{display:flex;align-items:center;justify-content:space-between;width:100%;padding:16px 0;border:0;background:none;text-align:left;cursor:pointer;font-size:1.3rem;font-weight:600;letter-spacing:-.01em;transition:color .2s}
+    .d-top{display:flex;align-items:center;justify-content:space-between;width:100%;padding:16px 0;border:0;background:none;text-align:start;cursor:pointer;font-size:1.3rem;font-weight:600;letter-spacing:-.01em;transition:color .2s}
     .dn>.d-top{border-bottom:1px solid var(--line)}
     .d-top:hover,.d-top[aria-current="page"]{color:var(--accent)}
     .d-top .i{width:20px;height:20px;transition:transform .45s var(--ease)}
@@ -198,6 +260,14 @@
     .d-foot{padding:20px 24px calc(24px + env(safe-area-inset-bottom,0px));margin-top:auto;opacity:0;transform:translateX(20px)}
     .d-foot .cta{width:100%;justify-content:center;height:48px;margin-bottom:14px}
     .d-foot small{display:block;color:var(--mut);font-size:.78rem}
+
+    /* Arab (kanan ke kiri) */
+    .root[dir="rtl"] .dl .i{transform:translateX(8px) scaleX(-1)}
+    .root[dir="rtl"] .dl:hover .i,.root[dir="rtl"] .dl:focus-visible .i{transform:scaleX(-1)}
+    .root[dir="rtl"] .drawer{right:auto;left:0;transform:translateX(-104%);box-shadow:30px 0 60px -30px rgba(0,0,0,.4)}
+    .root[dir="rtl"][data-menu] .drawer{transform:none}
+    .root[dir="rtl"] .dn>*,.root[dir="rtl"] .d-foot{transform:translateX(-20px)}
+    .root[dir="rtl"][data-menu] .dn>*,.root[dir="rtl"][data-menu] .d-foot{transform:none}
 
     @media (max-width:860px){
       .track,.end .cta{display:none}
@@ -227,15 +297,17 @@
     .legal small{display:block;margin-top:4px;color:#8d8d98;font-size:.72rem}
     .legal small a:hover{color:#fff}
     .right{display:flex;align-items:center;gap:6px;flex:none}
+    .socials{display:flex;align-items:center;gap:6px}
     .soc{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;color:#e4e4ea;transition:color .2s,background .2s,transform .35s cubic-bezier(.22,.8,.24,1)}
     .soc:hover{color:#fff;background:#1d1d24;transform:translateY(-2px)}
     .soc .i{width:23px;height:23px;stroke-width:1.7}
-    .country{position:relative;display:flex;align-items:center;gap:10px;width:170px;height:42px;margin-left:14px;padding:0 34px 0 12px;border:1px solid #4a4a54;border-radius:8px;transition:border-color .2s}
+    .country{position:relative;display:flex;align-items:center;gap:10px;width:170px;height:42px;margin-inline-start:14px;padding-block:0;padding-inline:12px 34px;border:1px solid #4a4a54;border-radius:8px;transition:border-color .2s}
     .country:hover,.country:focus-within{border-color:#8a8a96}
     .code{display:grid;place-items:center;flex:none;min-width:22px;height:16px;padding:0 4px;border-radius:3px;background:#2b2b33;font-size:.6rem;font-weight:700;letter-spacing:.04em;color:#e4e4ea}
     .country select{width:100%;min-width:0;height:100%;border:0;outline:0;background:transparent;color:#fff;font:inherit;font-size:.82rem;cursor:pointer;appearance:none;-webkit-appearance:none}
     .country select option{background:#17171c;color:#fff}
-    .country .i{position:absolute;right:12px;top:50%;width:14px;height:14px;margin-top:-7px;pointer-events:none;color:#c9c9d1}
+    .country .i{position:absolute;inset-inline-end:12px;top:50%;width:14px;height:14px;margin-top:-7px;pointer-events:none;color:#c9c9d1}
+    .root[dir="rtl"] .col a::after{transform-origin:right}
     @media (max-width:1000px){
       .top{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
       .brand{grid-column:1/-1}
@@ -243,8 +315,11 @@
     @media (max-width:640px){
       .root{padding:44px 20px calc(24px + env(safe-area-inset-bottom,0px))}
       .bottom{flex-direction:column;align-items:flex-start;gap:20px;margin-top:40px}
-      .right{width:100%;flex-wrap:wrap}
-      .country{margin-left:0;width:100%;max-width:340px;order:-1}
+      /* HP: pemilih bahasa satu baris penuh, ikon sosial di baris sendiri di bawahnya */
+      .right{width:100%;flex-direction:column;align-items:stretch;gap:14px}
+      .country{margin-inline-start:0;width:100%;max-width:none;order:-1}
+      .country select{font-size:16px} /* 16px: cegah iOS Safari zoom otomatis saat select dibuka */
+      .socials{margin-inline-start:-8px}
       .brand img{width:170px}
     }
     @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}}
@@ -274,7 +349,7 @@
     }
 
     render() {
-      const c = cfg(), b = c.brand, items = c.nav || [], cur = this.getAttribute("current");
+      const c0 = cfg(), c = { ...c0, cta: c0.cta ? trItem(c0.cta) : null }, b = c.brand, items = (c.nav || []).map(trItem), cur = this.getAttribute("current");
       if (c.loadFont) ensureFont();
       const hasKids = (it) => !!(it.children && it.children.length);
       const isCur = (it) => (cur ? it.id === cur : it.href ? isCurrent(it) : (it.children || []).some(isCurrent));
@@ -284,8 +359,8 @@
       const triggers = items.map((it, i) => hasKids(it)
         ? h("button", { class: "it", type: "button", "aria-haspopup": "true", "aria-expanded": "false", "aria-controls": "dd", "data-i": i, "data-cur": isCur(it) }, it.label, icon("chevron"))
         : h(it.href ? "a" : "span", { class: "it", "data-i": i, "data-cur": isCur(it), ...(it.href ? attrs(it, isCur(it)) : {}) }, it.label));
-      const track = h("nav", { class: "track", "aria-label": "Navigasi utama" }, glider, triggers);
-      const burger = h("button", { class: "burger", type: "button", "aria-label": "Buka menu", "aria-expanded": "false", "aria-controls": "drawer" }, icon("menu"));
+      const track = h("nav", { class: "track", "aria-label": t("Navigasi utama") }, glider, triggers);
+      const burger = h("button", { class: "burger", type: "button", "aria-label": t("Buka menu"), "aria-expanded": "false", "aria-controls": "drawer" }, icon("menu"));
       const cta = c.cta ? h("a", { class: "cta", ...attrs(c.cta, false) }, c.cta.label) : null;
       const brand = h("a", { class: "brand", href: b.href, "aria-label": b.name }, h("img", { src: b.mark, alt: "" }));
 
@@ -299,7 +374,7 @@
 
       // --- panel menu
       let n = 0;
-      const dn = h("nav", { class: "dn", "aria-label": "Menu utama" }, items.map((it) => {
+      const dn = h("nav", { class: "dn", "aria-label": t("Menu utama") }, items.map((it) => {
         const style = "--i:" + n++;
         if (hasKids(it)) {
           const open = isCur(it);
@@ -312,14 +387,15 @@
         }
         return h(it.href ? "a" : "span", { class: "d-top", style, ...(it.href ? attrs(it, isCur(it)) : {}) }, it.label);
       }));
-      const closeBtn = h("button", { class: "d-x", type: "button", "aria-label": "Tutup menu" }, icon("close"));
-      const drawer = h("aside", { class: "drawer", id: "drawer", "aria-label": "Menu", tabindex: "-1" },
+      const closeBtn = h("button", { class: "d-x", type: "button", "aria-label": t("Tutup menu") }, icon("close"));
+      const drawer = h("aside", { class: "drawer", id: "drawer", "aria-label": t("Menu"), tabindex: "-1" },
         h("div", { class: "d-head" }, h("a", { class: "brand", href: b.href, "aria-label": b.name }, h("img", { src: b.mark, alt: "" })), closeBtn),
         dn,
         h("div", { class: "d-foot", style: "--i:" + n }, c.cta ? h("a", { class: "cta", ...attrs(c.cta, false) }, c.cta.label) : null, h("small", null, b.name)));
       const scrim = h("div", { class: "scrim" });
       const root = h("div", { class: "root" }, bar, scrim, drawer);
       this.mount(HEADER_CSS, root);
+      langAttrs(root, c.loadFont);
 
       // --- tema
       this._applyMode = () => { root.dataset.mode = modeOf(this); };
@@ -456,40 +532,44 @@
       if (c.loadFont) ensureFont();
       const logo = h("img", { src: b.logoOnDark || b.logo, alt: b.name, class: b.logoOnDark ? "" : "invert" });
 
-      const social = (f.social || []).map((s) => h("a", { class: "soc", "aria-label": s.label, title: s.label, ...attrs(s, false) }, icon(s.icon || "globe")));
+      const social = (f.social || []).map((s) => h("a", { class: "soc", "aria-label": t(s.label), title: t(s.label), ...attrs(s, false) }, icon(s.icon || "globe")));
 
-      let country = null;
-      const list = f.countries || [];
+      // Pemilih bahasa: mengganti teks header + footer
+      let picker = null;
+      const list = langList();
       if (list.length) {
-        const sel = Math.max(list.findIndex((x) => x.selected), 0);
-        const code = h("span", { class: "code", "aria-hidden": "true" }, list[sel].code || "");
-        const select = h("select", { "aria-label": "Pilih negara" }, list.map((x, i) => h("option", { value: i, selected: i === sel }, x.name)));
-        select.addEventListener("change", () => {
-          const picked = list[Number(select.value)];
-          code.textContent = picked.code || "";
-          this.dispatchEvent(new CustomEvent("joomax:country", { bubbles: true, composed: true, detail: picked }));
-        });
-        country = h("label", { class: "country" }, code, select, icon("chevron"));
+        const sel = Math.max(list.findIndex((x) => codeOf(x) === lang()), 0);
+        const code = h("span", { class: "code", "aria-hidden": "true" }, String(list[sel].code || "").toUpperCase());
+        const select = h("select", { "aria-label": t("Pilih bahasa") }, list.map((x, i) => h("option", { value: i, selected: i === sel, lang: codeOf(x) }, x.name)));
+        select.addEventListener("change", () => setLang(codeOf(list[Number(select.value)])));
+        picker = h("label", { class: "country" }, code, select, icon("chevron"));
       }
 
-      const credit = f.credit ? h("small", null, f.creditHref ? h("a", { ...attrs({ href: f.creditHref }, false) }, f.credit) : f.credit) : null;
+      const credit = f.credit ? h("small", null, f.creditHref ? h("a", { ...attrs({ href: f.creditHref }, false) }, t(f.credit)) : t(f.credit)) : null;
       const root = h("footer", { class: "root" });
       root.style.setProperty("--cols", cols.length || 1);
       root.append(h("div", { class: "in" },
         h("div", { class: "top" },
           h("a", { class: "brand", href: b.href, "aria-label": b.name }, logo),
-          cols.map((col) => h("nav", { class: "col", "aria-label": col.title }, h("h2", null, col.title),
-            (col.links || []).map((l) => h(l.href ? "a" : "span", l.href ? attrs(l, false) : {}, l.label))))),
+          cols.map((col) => h("nav", { class: "col", "aria-label": t(col.title) }, h("h2", null, t(col.title)),
+            (col.links || []).map((l) => h(l.href ? "a" : "span", l.href ? attrs(l, false) : {}, t(l.label)))))),
         h("div", { class: "bottom" },
-          h("div", { class: "legal" }, String(f.copyright || "").replace("{year}", new Date().getFullYear()), credit),
-          h("div", { class: "right" }, social, country))));
+          h("div", { class: "legal" }, String(t(f.copyright) || "").replace("{year}", new Date().getFullYear()), credit),
+          h("div", { class: "right" }, h("div", { class: "socials" }, social), picker))));
       root.addEventListener("click", (e) => { if (e.target.closest("a[data-ph]")) e.preventDefault(); });
       this.mount(FOOTER_CSS, root);
+      langAttrs(root, c.loadFont);
     }
   }
 
   customElements.define("joomax-header", JoomaxHeader);
   customElements.define("joomax-footer", JoomaxFooter);
 
-  window.JoomaxLayout = { version: "2.0.0", refresh: () => instances.forEach((el) => el.refresh()) };
+  window.JoomaxLayout = {
+    version: "2.1.0",
+    refresh: () => instances.forEach((el) => el.refresh()),
+    setLanguage: setLang,
+    get language() { return lang(); },
+    t
+  };
 })();
