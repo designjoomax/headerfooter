@@ -13,7 +13,8 @@
  *
  * Atribut <joomax-header>: sticky | theme="light|dark" | current="id-menu"
  * Isi menu/footer: window.JOOMAX_LAYOUT (lihat joomax-layout.config.js)
- * Bahasa : pemilih bahasa di footer menerjemahkan header + footer (Indonesia, English, 中文, Русский, العربية).
+ * Beta   : mode demo untuk website yang belum boleh ketahuan (link mati, menu disembunyikan). Lihat config.beta di joomax-layout.beta.config.js
+ * Bahasa : pemilih bahasa di footer menerjemahkan header + footer + ISI HALAMAN (Indonesia, English, 中文, Русский, العربية).
  *          Kamus ada di config (i18n.dict). Pilihan disimpan di localStorage dan event "joomax:language" dikirim ke halaman.
  * CSS website: --jx-accent --jx-accent-dark --jx-font --jx-max (lebar header) --jx-footer-max
  */
@@ -32,11 +33,49 @@
     nav: [],
     cta: null,
     i18n: { default: "", dict: {} },
+    page: { enabled: true, source: "id", rtl: true, root: "body", skip: "" },
     footer: { columns: [], social: [], copyright: "© {year} Joomax Teknologi Indonesia. All Rights Reserved.", credit: "", creditHref: "", languages: [] }
+  };
+  // ---------- Mode beta ----------
+  // Aktif kalau config.beta ada, atau window.JOOMAX_BETA = true / { ... } diset sebelum script.
+  const BETA_DEFAULTS = {
+    nav: false,              // menu header + hamburger (false = header hanya logo)
+    columns: ["Information"], // kolom footer yang tampil: daftar judul, "all" = semua, false = tidak ada
+    links: false,            // false = semua link jadi teks biasa (tanpa href, tidak bisa diklik)
+    brandLink: false,        // logo bisa diklik atau tidak
+    social: true,            // tampilkan ikon sosial
+    socialLinks: true,       // ikon sosial tetap bisa diklik (false = mati juga)
+    language: true           // tampilkan pemilih bahasa
+  };
+  const betaOf = (u) => {
+    let b = window.JOOMAX_BETA !== undefined ? window.JOOMAX_BETA : u.beta;
+    if (b === true) b = {};
+    if (!b || typeof b !== "object" || b.enabled === false) return null;
+    return { ...BETA_DEFAULTS, ...b };
+  };
+  const noHref = (it) => { const { href, ...r } = it; return it.children ? { ...r, children: it.children.map(noHref) } : r; };
+  const applyBeta = (c, b) => {
+    const f = { ...c.footer };
+    const titles = Array.isArray(b.columns) ? b.columns.map((x) => String(x).toLowerCase()) : null;
+    let cols = b.columns === false ? [] : (titles ? (f.columns || []).filter((col) => titles.includes(String(col.title).toLowerCase())) : (f.columns || []));
+    let nav = b.nav ? (c.nav || []) : [];
+    let social = b.social === false ? [] : (f.social || []);
+    if (!b.links) {
+      nav = nav.map(noHref);
+      cols = cols.map((col) => ({ ...col, links: (col.links || []).map(noHref) }));
+    }
+    if (!b.socialLinks) social = social.map(noHref);
+    if (b.language === false) { f.languages = []; f.countries = []; }
+    f.columns = cols; f.social = social;
+    const brand = { ...c.brand };
+    if (!b.brandLink) brand.href = null;
+    return { ...c, nav, cta: null, brand, footer: f, beta: b };
   };
   const cfg = () => {
     const u = window.JOOMAX_LAYOUT || {};
-    return { ...DEFAULTS, ...u, brand: { ...DEFAULTS.brand, ...(u.brand || {}) }, footer: { ...DEFAULTS.footer, ...(u.footer || {}) }, i18n: { ...DEFAULTS.i18n, ...(u.i18n || {}) } };
+    const c = { ...DEFAULTS, ...u, brand: { ...DEFAULTS.brand, ...(u.brand || {}) }, footer: { ...DEFAULTS.footer, ...(u.footer || {}) }, i18n: { ...DEFAULTS.i18n, ...(u.i18n || {}) }, page: { ...DEFAULTS.page, ...(u.page || {}) } };
+    const b = betaOf(u);
+    return b ? applyBeta(c, b) : c;
   };
 
   // ---------- Util ----------
@@ -157,11 +196,154 @@
     try { localStorage.setItem(LS_KEY, LANG); } catch {}
     document.documentElement.lang = LANG;
     instances.forEach((el) => el.refresh());
+    pageLangChanged();
     const detail = { ...item, code: LANG, dir: isRTL() ? "rtl" : "ltr" };
     document.dispatchEvent(new CustomEvent("joomax:language", { detail }));
     document.dispatchEvent(new CustomEvent("joomax:country", { detail }));
   };
   addEventListener("storage", (e) => { if (e.key === LS_KEY && e.newValue) setLang(e.newValue); });
+
+  // ---------- Terjemah isi halaman (body) ----------
+  // Saat bahasa dipilih di footer, teks di seluruh website ikut berganti:
+  //  - teks biasa  : dicocokkan PERSIS dengan kamus (i18n.dict + JoomaxLayout.addDict + window.JOOMAX_PAGE_DICT)
+  //  - atribut     : placeholder, title, alt, aria-label
+  //  - <title>     : judul tab
+  //  - data-i18n   : <p data-i18n="kunci"> isinya diganti kamus["kunci"] (boleh berisi HTML, untuk kalimat dengan <b>, <a>, <code>)
+  //  - konten baru : yang muncul belakangan (JS/React) ikut diterjemahkan otomatis
+  // Dilewati: script, style, code, pre, textarea, svg, [translate="no"], .notranslate, [data-i18n-skip], [contenteditable]
+  // Teks asli selalu disimpan, jadi pindah balik ke bahasa asal mengembalikan teks persis seperti semula.
+  const PAGE_ATTRS = ["placeholder", "title", "alt", "aria-label"];
+  const ATTR_SEL = PAGE_ATTRS.map((a) => "[" + a + "]").join(",");
+  const PAGE_SKIP = 'script,style,noscript,textarea,code,pre,kbd,samp,svg,canvas,iframe,joomax-header,joomax-footer,[translate="no"],.notranslate,[contenteditable=""],[contenteditable="true"],[data-i18n-skip],[data-i18n]';
+  const TEXT_STATE = new WeakMap(), ATTR_STATE = new WeakMap(), BLOCK_STATE = new WeakMap();
+  const extraDict = {};
+  let pageOn = false, pageObs = null, pending = new Set(), flushT = 0, docDir0;
+
+  const normTxt = (x) => String(x).replace(/\s+/g, " ").trim();
+  const wantsTr = (n) => n.length > 1 && /\p{L}/u.test(n) && !/^(https?:\/\/|www\.)\S+$/i.test(n) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(n);
+  const dictOf = (code) => Object.assign(Object.create(null), (cfg().i18n.dict || {})[code], (window.JOOMAX_PAGE_DICT || {})[code], extraDict[code]);
+  const selOf = (o) => PAGE_SKIP + (o.skip ? "," + o.skip : "");
+  const rootOf = (o) => document.querySelector(o.root || "body") || document.body;
+  const lookup = (key, dict) => (dict[key] != null ? dict[key] : null);
+
+  const doText = (node, dict) => {
+    let st = TEXT_STATE.get(node);
+    if (!st || node.data !== st.a) st = { o: node.data, a: node.data };    // diganti website sendiri = teks asli baru
+    const norm = normTxt(st.o), out = norm ? lookup(norm, dict) : null;
+    let next = st.o;
+    if (out != null) next = st.o.match(/^\s*/)[0] + out + st.o.match(/\s*$/)[0];
+    if (node.data !== next) node.data = next;
+    st.a = next; TEXT_STATE.set(node, st);
+  };
+  const doAttrs = (el, dict) => {
+    let m = ATTR_STATE.get(el);
+    if (!m) { m = {}; ATTR_STATE.set(el, m); }
+    for (const a of PAGE_ATTRS) {
+      const cur = el.getAttribute(a);
+      if (cur == null) { delete m[a]; continue; }
+      let st = m[a];
+      if (!st || cur !== st.a) st = m[a] = { o: cur, a: cur };
+      const norm = normTxt(st.o), out = norm ? lookup(norm, dict) : null, next = out != null ? out : st.o;
+      if (cur !== next) el.setAttribute(a, next);
+      st.a = next;
+    }
+  };
+  const doBlock = (el, dict) => {
+    let st = BLOCK_STATE.get(el);
+    if (!st || el.innerHTML !== st.a) st = { o: el.innerHTML, a: el.innerHTML };
+    const out = lookup(normTxt(el.getAttribute("data-i18n")), dict), next = out != null ? out : st.o;
+    if (el.innerHTML !== next) el.innerHTML = next;
+    st.a = el.innerHTML; BLOCK_STATE.set(el, st);
+  };
+  const srcText = (n) => { const st = TEXT_STATE.get(n); return st && st.a === n.data ? st.o : n.data; };
+  const srcAttr = (el, a) => { const m = ATTR_STATE.get(el), st = m && m[a]; return st && st.a === el.getAttribute(a) ? st.o : el.getAttribute(a); };
+
+  // kumpulkan semua yang perlu diterjemahkan di bawah root
+  const collect = (root, sel) => {
+    const out = { texts: [], attrEls: [], blocks: [] };
+    const outside = (el) => { const p = el.parentElement; return !(p && p.closest(sel)); };
+    if (root.nodeType === 3) { if (outside(root)) out.texts.push(root); return out; }
+    if (root.nodeType !== 1) return out;
+    [root, ...root.querySelectorAll("[data-i18n]")].forEach((el) => { if (el.hasAttribute("data-i18n") && outside(el)) out.blocks.push(el); });
+    if (root.closest(sel)) return out;
+    const tw = document.createTreeWalker(root, 4);
+    for (let n = tw.nextNode(); n; n = tw.nextNode()) if (outside(n)) out.texts.push(n);
+    [root, ...root.querySelectorAll(ATTR_SEL)].forEach((el) => { if (!el.closest(sel) && PAGE_ATTRS.some((a) => el.hasAttribute(a))) out.attrEls.push(el); });
+    return out;
+  };
+  const applyTo = (root, dict, sel) => {
+    const c = collect(root, sel);
+    c.blocks.forEach((el) => doBlock(el, dict));
+    c.texts.forEach((n) => doText(n, dict));
+    c.attrEls.forEach((el) => doAttrs(el, dict));
+  };
+  const watch = (o) => { if (pageObs) pageObs.observe(rootOf(o), { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PAGE_ATTRS }); };
+  const applyPage = () => {
+    if (!pageOn) return;
+    const o = cfg().page, dict = dictOf(lang()), sel = selOf(o), root = rootOf(o);
+    if (!root) return;
+    pageObs.disconnect();
+    try {
+      applyTo(root, dict, sel);
+      const tt = document.querySelector("title"), tn = tt && tt.firstChild;
+      if (tn && tn.nodeType === 3) doText(tn, dict);
+    } finally { watch(o); }
+  };
+  const flush = () => {
+    const nodes = [...pending]; pending = new Set();
+    const o = cfg().page, dict = dictOf(lang()), sel = selOf(o);
+    pageObs.disconnect();
+    try { nodes.forEach((n) => { if (n.isConnected) applyTo(n, dict, sel); }); } finally { watch(o); }
+  };
+  const onMut = (records) => {
+    for (const r of records) { if (r.type === "childList") r.addedNodes.forEach((n) => pending.add(n)); else pending.add(r.target); }
+    clearTimeout(flushT); flushT = setTimeout(flush, 60);
+  };
+  const applyDir = (o) => {
+    if (!o.rtl) return;
+    const de = document.documentElement;
+    if (docDir0 === undefined) docDir0 = de.getAttribute("dir");
+    if (isRTL()) de.setAttribute("dir", "rtl");
+    else if (docDir0 == null) de.removeAttribute("dir");
+    else de.setAttribute("dir", docDir0);
+  };
+  const pageLangChanged = () => {
+    if (!pageOn) return;
+    document.documentElement.setAttribute("data-jx-lang", lang());
+    applyDir(cfg().page);
+    applyPage();
+  };
+  const startPage = () => {
+    if (pageOn || !cfg().page.enabled) return;
+    pageOn = true;
+    pageObs = new MutationObserver(onMut);
+    pageLangChanged();
+  };
+  const addDict = (d) => {
+    for (const code of Object.keys(d || {})) extraDict[code] = { ...(extraDict[code] || {}), ...d[code] };
+    applyPage(); instances.forEach((el) => el.refresh());
+  };
+  // Alat bantu: daftar teks di halaman ini yang belum ada terjemahannya (buka console, ketik JoomaxLayout.scan())
+  const scanPage = () => {
+    const o = cfg().page, sel = selOf(o), root = rootOf(o);
+    const langs = langList().map(codeOf).filter((c) => c !== o.source);
+    const dicts = langs.map((c) => [c, dictOf(c)]);
+    const missing = {};
+    const add = (raw, block) => {
+      const n = normTxt(raw);
+      if (!n || (!block && !wantsTr(n)) || missing[n]) return;
+      const miss = dicts.filter(([, d]) => d[n] == null).map(([c]) => c);
+      if (miss.length) missing[n] = miss;
+    };
+    const c = collect(root, sel);
+    c.texts.forEach((n) => add(srcText(n)));
+    c.attrEls.forEach((el) => PAGE_ATTRS.forEach((a) => { if (el.hasAttribute(a)) add(srcAttr(el, a)); }));
+    c.blocks.forEach((el) => add(el.getAttribute("data-i18n"), true));
+    const tt = document.querySelector("title"); if (tt && tt.firstChild) add(srcText(tt.firstChild));
+    const list = Object.keys(missing);
+    console.log("[joomax] " + list.length + " teks belum lengkap terjemahannya:", missing);
+    return missing;
+  };
 
   // ---------- CSS ----------
   const BASE_CSS = `
@@ -260,6 +442,10 @@
     .d-foot{padding:20px 24px calc(24px + env(safe-area-inset-bottom,0px));margin-top:auto;opacity:0;transform:translateX(20px)}
     .d-foot .cta{width:100%;justify-content:center;height:48px;margin-bottom:14px}
     .d-foot small{display:block;color:var(--mut);font-size:.78rem}
+
+    /* Mode beta: header hanya logo */
+    .root.lite .track,.root.lite .end,.root.lite .dd,.root.lite .scrim,.root.lite .drawer{display:none}
+    .root.lite .brand:not([href]){cursor:default}
 
     /* Arab (kanan ke kiri) */
     .root[dir="rtl"] .dl .i{transform:translateX(8px) scaleX(-1)}
@@ -393,7 +579,7 @@
         dn,
         h("div", { class: "d-foot", style: "--i:" + n }, c.cta ? h("a", { class: "cta", ...attrs(c.cta, false) }, c.cta.label) : null, h("small", null, b.name)));
       const scrim = h("div", { class: "scrim" });
-      const root = h("div", { class: "root" }, bar, scrim, drawer);
+      const root = h("div", { class: "root" + (c.beta && !c.beta.nav ? " lite" : "") }, bar, scrim, drawer);
       this.mount(HEADER_CSS, root);
       langAttrs(root, c.loadFont);
 
@@ -532,7 +718,7 @@
       if (c.loadFont) ensureFont();
       const logo = h("img", { src: b.logoOnDark || b.logo, alt: b.name, class: b.logoOnDark ? "" : "invert" });
 
-      const social = (f.social || []).map((s) => h("a", { class: "soc", "aria-label": t(s.label), title: t(s.label), ...attrs(s, false) }, icon(s.icon || "globe")));
+      const social = (f.social || []).map((s) => h(s.href ? "a" : "span", { class: "soc", "aria-label": t(s.label), title: t(s.label), ...attrs(s, false) }, icon(s.icon || "globe")));
 
       // Pemilih bahasa: mengganti teks header + footer
       let picker = null;
@@ -566,10 +752,16 @@
   customElements.define("joomax-footer", JoomaxFooter);
 
   window.JoomaxLayout = {
-    version: "2.1.0",
+    version: "2.3.0",
+    get beta() { return !!cfg().beta; },
+    addDict,
+    scan: scanPage,
+    translatePage: applyPage,
     refresh: () => instances.forEach((el) => el.refresh()),
     setLanguage: setLang,
     get language() { return lang(); },
     t
   };
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startPage); else startPage();
 })();

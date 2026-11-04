@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Demo terjemah isi halaman</title>
+<link rel="icon" href="assets/icon-red.png">
+<style>
+  :root{box-sizing:border-box}
+  *,*::before,*::after{box-sizing:inherit}
+  body{margin:0;background:#fff;color:#141416;font:16px/1.6 "Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  main{width:min(720px,calc(100% - 40px));margin:0 auto;padding:48px 0 72px}
+  h1{margin:0 0 8px;font-size:clamp(1.7rem,4vw,2.3rem);line-height:1.2}
+  h2{margin:36px 0 10px;font-size:1.15rem}
+  p{margin:0 0 12px;color:#55555f}
+  ul{margin:0 0 16px;padding-inline-start:20px}
+  li{margin:4px 0}
+  .row{display:flex;gap:8px;margin-bottom:8px}
+  input{flex:1;min-width:0;height:42px;padding:0 14px;border:1px solid #d7d7de;border-radius:10px;font:inherit;font-size:16px}
+  button{height:42px;padding:0 18px;border:0;border-radius:10px;background:#e60020;color:#fff;font:inherit;font-weight:600;cursor:pointer}
+  code{padding:1px 6px;border-radius:6px;background:#f3f3f6;font-size:.9em}
+  .brand{display:inline-block;padding:8px 14px;border:1px dashed #c8c8d0;border-radius:10px;color:#141416}
+  joomax-header:not(:defined){display:block;min-height:67px}
+</style>
+</head>
+<body>
+<joomax-header sticky></joomax-header>
+
+<main>
+  <h1>Demo terjemah isi halaman</h1>
+  <p>Ganti bahasa di footer paling bawah. Semua teks di halaman ini ikut berubah, bukan hanya header dan footer.</p>
+
+  <h2>Jadwal hari ini</h2>
+  <ul id="tasks">
+    <li>Rapat tim pagi</li>
+    <li>Desain materi promosi</li>
+    <li>Upload produk ke marketplace</li>
+  </ul>
+  <div class="row">
+    <input id="task-input" type="text" placeholder="Tambah tugas baru" title="Tambah tugas baru">
+    <button id="task-add" type="button">Tambah</button>
+  </div>
+
+  <h2>Kalimat dengan format</h2>
+  <p data-i18n="demo.tips">Tips: tulis kalimat dengan <b>huruf tebal</b> atau <a href="index.html">tautan</a> memakai <code>data-i18n</code>.</p>
+
+  <h2>Tidak ikut diterjemahkan</h2>
+  <p translate="no"><span class="brand">Joomax Teknologi Indonesia</span></p>
+  <p>Kalimat ini sengaja tidak ada di kamus, jadi tetap berbahasa Indonesia. Ketik <code>JoomaxLayout.scan()</code> di console untuk melihat daftar teks yang belum punya terjemahan.</p>
+</main>
+
+<joomax-footer></joomax-footer>
+
+<script src="joomax-layout.config.js"></script>
+<script src="joomax-layout.js"></script>
+<script>
+  // Kamus khusus halaman ini. Kunci = teks aslinya (Indonesia). Urutan bahasa bebas, bahasa yang tidak ditulis dibiarkan Indonesia.
+  JoomaxLayout.addDict({
+    en: {
+      "Demo terjemah isi halaman": "Page content translation demo",
+      "Ganti bahasa di footer paling bawah. Semua teks di halaman ini ikut berubah, bukan hanya header dan footer.": "Change the language in the footer at the bottom. All text on this page changes too, not just the header and footer.",
+      "Jadwal hari ini": "Today's schedule",
+      "Rapat tim pagi": "Morning team meeting",
+      "Desain materi promosi": "Design promotional materials",
+      "Upload produk ke marketplace": "Upload products to the marketplace",
+      "Tambah tugas baru": "Add a new task",
+      "Tambah": "Add",
+      "Tugas baru dari JavaScript": "New task added by JavaScript",
+      "Kalimat dengan format": "Sentences with formatting",
+      "Tidak ikut diterjemahkan": "Not translated",
+      "demo.tips": "Tip: write sentences with <b>bold text</b> or a <a href=\"index.html\">link</a> using <code>data-i18n</code>."
+    },
+    zh: {
+      "Demo terjemah isi halaman": "页面内容翻译演示",
+      "Ganti bahasa di footer paling bawah. Semua teks di halaman ini ikut berubah, bukan hanya header dan footer.": "在页面底部的页脚切换语言。本页所有文字都会随之变化，而不仅仅是页眉和页脚。",
+      "Jadwal hari ini": "今日安排",
+      "Rapat tim pagi": "团队晨会",
+      "Desain materi promosi": "设计宣传物料",
+      "Upload produk ke marketplace": "上传商品到电商平台",
+      "Tambah tugas baru": "添加新任务",
+      "Tambah": "添加",
+      "Tugas baru dari JavaScript": "由 JavaScript 添加的新任务",
+      "Kalimat dengan format": "带格式的句子",
+      "Tidak ikut diterjemahkan": "不翻译的内容",
+      "demo.tips": "提示：使用 <code>data-i18n</code> 可以编写带有<b>粗体文字</b>或<a href=\"index.html\">链接</a>的句子。"
+    },
+    ru: {
+      "Demo terjemah isi halaman": "Демо перевода содержимого страницы",
+      "Ganti bahasa di footer paling bawah. Semua teks di halaman ini ikut berubah, bukan hanya header dan footer.": "Смените язык в футере внизу страницы. Меняется весь текст на странице, а не только шапка и футер.",
+      "Jadwal hari ini": "Расписание на сегодня",
+      "Rapat tim pagi": "Утреннее совещание команды",
+      "Desain materi promosi": "Дизайн рекламных материалов",
+      "Upload produk ke marketplace": "Загрузить товары на маркетплейс",
+      "Tambah tugas baru": "Добавить новую задачу",
+      "Tambah": "Добавить",
+      "Tugas baru dari JavaScript": "Новая задача, добавленная JavaScript",
+      "Kalimat dengan format": "Предложения с форматированием",
+      "Tidak ikut diterjemahkan": "Не переводится",
+      "demo.tips": "Совет: с помощью <code>data-i18n</code> можно писать предложения с <b>жирным текстом</b> или <a href=\"index.html\">ссылкой</a>."
+    },
+    ar: {
+      "Demo terjemah isi halaman": "عرض تجريبي لترجمة محتوى الصفحة",
+      "Ganti bahasa di footer paling bawah. Semua teks di halaman ini ikut berubah, bukan hanya header dan footer.": "غيّر اللغة من التذييل في أسفل الصفحة. ستتغير جميع النصوص في هذه الصفحة، وليس الرأس والتذييل فقط.",
+      "Jadwal hari ini": "جدول اليوم",
+      "Rapat tim pagi": "اجتماع الفريق الصباحي",
+      "Desain materi promosi": "تصميم المواد الترويجية",
+      "Upload produk ke marketplace": "رفع المنتجات إلى السوق الإلكتروني",
+      "Tambah tugas baru": "أضف مهمة جديدة",
+      "Tambah": "إضافة",
+      "Tugas baru dari JavaScript": "مهمة جديدة أضافها JavaScript",
+      "Kalimat dengan format": "جمل منسّقة",
+      "Tidak ikut diterjemahkan": "غير مترجم",
+      "demo.tips": "نصيحة: استخدم <code>data-i18n</code> لكتابة جمل تحتوي على <b>نص غامق</b> أو <a href=\"index.html\">رابط</a>."
+    }
+  });
+
+  // Contoh konten yang ditambah JavaScript: otomatis ikut diterjemahkan.
+  document.getElementById("task-add").addEventListener("click", () => {
+    const li = document.createElement("li");
+    li.textContent = document.getElementById("task-input").value.trim() || "Tugas baru dari JavaScript";
+    document.getElementById("tasks").append(li);
+    document.getElementById("task-input").value = "";
+  });
+</script>
+</body>
+</html>

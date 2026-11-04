@@ -6,6 +6,8 @@
 // Semua link harus ABSOLUT (https://...) karena file ini dipakai dari website lain.
 // href: "#"  = link sementara (diklik tidak ke mana-mana).
 // Website yang butuh isi sendiri: definisikan window.JOOMAX_LAYOUT sebelum script ini.
+// Website yang belum boleh ketahuan: pakai joomax-layout.beta.config.js (tanpa link internal),
+// atau tulis <script>window.JOOMAX_BETA = true;</script> sebelum script ini (link tetap ada di file ini).
 // ===========================================================================
 (() => {
   const SITE = "https://designjoomax.github.io";
@@ -23,6 +25,63 @@
     // link sementara (ganti kalau halamannya sudah ada)
     others: "#", about: "#", team: "#", contact: "#", resource: "#", privacy: "#", terms: "#", help: "#"
   };
+
+  // ---- Terjemahan: tulis SEKALI di sini, dipakai header, footer, dan isi halaman ----
+  // Kunci = teks yang ditulis di menu/footer/halaman. Tiap baris WAJIB berisi 5 bahasa, urutannya:
+  //            Indonesia | English | 中文 | Русский | العربية
+  // Menambah menu baru? Tambahkan barisnya di sini. Baris yang kurang bahasa akan diberi peringatan di console.
+  const LANGS = ["id", "en", "zh", "ru", "ar"];
+  const TEXT = {
+    // menu header
+    "Home":     ["Beranda", "Home", "首页", "Главная", "الرئيسية"],
+    "Workspace":["Ruang Kerja", "Workspace", "工作区", "Рабочее пространство", "مساحة العمل"],
+    "Creative": ["Kreatif", "Creative", "创意", "Креатив", "الإبداع"],
+    "Gallery":  ["Galeri", "Gallery", "图库", "Галерея", "المعرض"],
+    "Jadwal Kerja":   ["Jadwal Kerja", "Work Schedule", "工作排班", "График работы", "جدول العمل"],
+    "Lihat jadwal kerja tim": ["Lihat jadwal kerja tim", "View the team's work schedule", "查看团队工作排班", "Посмотреть график работы команды", "عرض جدول عمل الفريق"],
+    "Jadwal Piket":   ["Jadwal Piket", "Duty Roster", "值日表", "График дежурств", "جدول المناوبات"],
+    "Cek giliran piket harian": ["Cek giliran piket harian", "Check daily duty turns", "查看每日值日安排", "Проверьте дежурства на сегодня", "تحقق من مناوبات اليوم"],
+    "Pengajuan Izin": ["Pengajuan Izin", "Leave Request", "请假申请", "Заявка на отгул", "طلب إجازة"],
+    "Ajukan izin dan sakit": ["Ajukan izin dan sakit", "Request leave or sick days", "申请事假和病假", "Подайте заявку на отгул или больничный", "قدّم طلب إجازة أو إجازة مرضية"],
+    "Image to Frame": ["Gambar ke Bingkai", "Image to Frame", "图片加相框", "Изображение в рамку", "صورة إلى إطار"],
+    "Pasang frame Joomax ke foto": ["Pasang frame Joomax ke foto", "Add the Joomax frame to your photo", "为照片添加 Joomax 相框", "Добавьте рамку Joomax к фото", "أضف إطار Joomax إلى صورتك"],
+    "Generate": ["Generator", "Generate", "生成", "Генерация", "إنشاء"],
+    "Buat gambar produk marketplace": ["Buat gambar produk marketplace", "Create marketplace product images", "制作电商平台商品图", "Создавайте изображения товаров для маркетплейсов", "أنشئ صور منتجات للأسواق الإلكترونية"],
+    "Tools":    ["Alat", "Tools", "工具", "Инструменты", "الأدوات"],
+    "Alat bantu kreatif": ["Alat bantu kreatif", "Creative helper tools", "创意辅助工具", "Творческие инструменты", "أدوات مساعدة إبداعية"],
+    "Dokumentasi": ["Dokumentasi", "Documentation", "活动纪实", "Документация", "التوثيق"],
+    "Foto kegiatan dan momen kantor": ["Foto kegiatan dan momen kantor", "Photos of activities and office moments", "活动照片与办公室瞬间", "Фото мероприятий и моментов в офисе", "صور الفعاليات ولحظات المكتب"],
+    "Others":   ["Lainnya", "Others", "其他", "Другое", "أخرى"],
+    "Segera hadir": ["Segera hadir", "Coming soon", "敬请期待", "Скоро", "قريباً"],
+    // footer
+    "Company":  ["Perusahaan", "Company", "公司", "Компания", "الشركة"],
+    "About Us": ["Tentang Kami", "About Us", "关于我们", "О нас", "من نحن"],
+    "Our Team": ["Tim Kami", "Our Team", "我们的团队", "Наша команда", "فريقنا"],
+    "Contact":  ["Kontak", "Contact", "联系我们", "Контакты", "اتصل بنا"],
+    "Resource Center": ["Pusat Sumber Daya", "Resource Center", "资源中心", "Центр ресурсов", "مركز الموارد"],
+    "Information": ["Informasi", "Information", "信息", "Информация", "معلومات"],
+    "Privacy Policy": ["Kebijakan Privasi", "Privacy Policy", "隐私政策", "Политика конфиденциальности", "سياسة الخصوصية"],
+    "Terms of Use":   ["Syarat Penggunaan", "Terms of Use", "使用条款", "Условия использования", "شروط الاستخدام"],
+    "Help Center":    ["Pusat Bantuan", "Help Center", "帮助中心", "Центр поддержки", "مركز المساعدة"],
+    "© {year} Joomax Teknologi Indonesia. All Rights Reserved.": ["© {year} Joomax Teknologi Indonesia. Hak cipta dilindungi.", "© {year} Joomax Teknologi Indonesia. All Rights Reserved.", "© {year} Joomax Teknologi Indonesia 版权所有。", "© {year} Joomax Teknologi Indonesia. Все права защищены.", "© {year} Joomax Teknologi Indonesia. جميع الحقوق محفوظة."],
+    "Create : fixs.arts studio": ["Dibuat oleh fixs.arts studio", "Created by fixs.arts studio", "设计：fixs.arts studio", "Создано: fixs.arts studio", "تصميم: fixs.arts studio"],
+    "Email":     ["Email", "Email", "电子邮件", "Эл. почта", "البريد الإلكتروني"],
+    "Website":   ["Situs Web", "Website", "网站", "Сайт", "الموقع"],
+    "Instagram": ["Instagram", "Instagram", "Instagram", "Instagram", "Instagram"],
+    // label aksesibilitas (dibaca pembaca layar)
+    "Navigasi utama": ["Navigasi utama", "Main navigation", "主导航", "Главная навигация", "التنقل الرئيسي"],
+    "Buka menu":  ["Buka menu", "Open menu", "打开菜单", "Открыть меню", "فتح القائمة"],
+    "Tutup menu": ["Tutup menu", "Close menu", "关闭菜单", "Закрыть меню", "إغلاق القائمة"],
+    "Menu utama": ["Menu utama", "Main menu", "主菜单", "Главное меню", "القائمة الرئيسية"],
+    "Menu":       ["Menu", "Menu", "菜单", "Меню", "القائمة"],
+    "Pilih bahasa": ["Pilih bahasa", "Select language", "选择语言", "Выберите язык", "اختر اللغة"]
+  };
+  const DICT = {};
+  LANGS.forEach((code) => { DICT[code] = {}; });
+  Object.keys(TEXT).forEach((key) => {
+    if (TEXT[key].length !== LANGS.length) console.warn("[joomax] terjemahan tidak lengkap (harus " + LANGS.length + " bahasa):", key);
+    LANGS.forEach((code, i) => { if (TEXT[key][i] != null) DICT[code][key] = TEXT[key][i]; });
+  });
 
   window.JOOMAX_LAYOUT = window.JOOMAX_LAYOUT || {
 
@@ -57,85 +116,20 @@
     // Tombol merah di kanan header. Contoh: { label: "Hubungi Kami", href: LINK.contact }
     cta: null,
 
-    // ---- Terjemahan -----------------------------------------------------------
-    // Kunci = teks aslinya (Indonesia/Inggris seperti yang tertulis di atas).
-    // Teks yang tidak ada di kamus tampil apa adanya. Bahasa "id" tidak perlu kamus.
-    // Tambah menu baru? Tambahkan juga terjemahannya di sini.
-    i18n: {
-      default: "id",
-      dict: {
-        en: {
-          "Jadwal Kerja": "Work Schedule", "Lihat jadwal kerja tim": "View the team's work schedule",
-          "Jadwal Piket": "Duty Roster", "Cek giliran piket harian": "Check daily duty turns",
-          "Pengajuan Izin": "Leave Request", "Ajukan izin dan sakit": "Request leave or sick days",
-          "Pasang frame Joomax ke foto": "Add the Joomax frame to your photo",
-          "Buat gambar produk marketplace": "Create marketplace product images",
-          "Alat bantu kreatif": "Creative helper tools",
-          "Dokumentasi": "Documentation", "Foto kegiatan dan momen kantor": "Photos of activities and office moments",
-          "Segera hadir": "Coming soon",
-          "Create : fixs.arts studio": "Created by fixs.arts studio",
-          "Website": "Website",
-          "Navigasi utama": "Main navigation", "Buka menu": "Open menu", "Tutup menu": "Close menu",
-          "Menu utama": "Main menu", "Menu": "Menu", "Pilih bahasa": "Select language"
-        },
-        zh: {
-          "Home": "首页", "Workspace": "工作区", "Creative": "创意", "Gallery": "图库",
-          "Jadwal Kerja": "工作排班", "Lihat jadwal kerja tim": "查看团队工作排班",
-          "Jadwal Piket": "值日表", "Cek giliran piket harian": "查看每日值日安排",
-          "Pengajuan Izin": "请假申请", "Ajukan izin dan sakit": "申请事假和病假",
-          "Image to Frame": "图片加相框", "Pasang frame Joomax ke foto": "为照片添加 Joomax 相框",
-          "Generate": "生成", "Buat gambar produk marketplace": "制作电商平台商品图",
-          "Tools": "工具", "Alat bantu kreatif": "创意辅助工具",
-          "Dokumentasi": "活动纪实", "Foto kegiatan dan momen kantor": "活动照片与办公室瞬间",
-          "Others": "其他", "Segera hadir": "敬请期待",
-          "Company": "公司", "About Us": "关于我们", "Our Team": "我们的团队", "Contact": "联系我们",
-          "Resource Center": "资源中心", "Information": "信息",
-          "Privacy Policy": "隐私政策", "Terms of Use": "使用条款", "Help Center": "帮助中心",
-          "© {year} Joomax Teknologi Indonesia. All Rights Reserved.": "© {year} Joomax Teknologi Indonesia 版权所有。",
-          "Create : fixs.arts studio": "设计：fixs.arts studio",
-          "Email": "电子邮件", "Website": "网站",
-          "Navigasi utama": "主导航", "Buka menu": "打开菜单", "Tutup menu": "关闭菜单",
-          "Menu utama": "主菜单", "Menu": "菜单", "Pilih bahasa": "选择语言"
-        },
-        ru: {
-          "Home": "Главная", "Workspace": "Рабочее пространство", "Creative": "Креатив", "Gallery": "Галерея",
-          "Jadwal Kerja": "График работы", "Lihat jadwal kerja tim": "Посмотреть график работы команды",
-          "Jadwal Piket": "График дежурств", "Cek giliran piket harian": "Проверьте дежурства на сегодня",
-          "Pengajuan Izin": "Заявка на отгул", "Ajukan izin dan sakit": "Подайте заявку на отгул или больничный",
-          "Image to Frame": "Изображение в рамку", "Pasang frame Joomax ke foto": "Добавьте рамку Joomax к фото",
-          "Generate": "Генерация", "Buat gambar produk marketplace": "Создавайте изображения товаров для маркетплейсов",
-          "Tools": "Инструменты", "Alat bantu kreatif": "Творческие инструменты",
-          "Dokumentasi": "Документация", "Foto kegiatan dan momen kantor": "Фото мероприятий и моментов в офисе",
-          "Others": "Другое", "Segera hadir": "Скоро",
-          "Company": "Компания", "About Us": "О нас", "Our Team": "Наша команда", "Contact": "Контакты",
-          "Resource Center": "Центр ресурсов", "Information": "Информация",
-          "Privacy Policy": "Политика конфиденциальности", "Terms of Use": "Условия использования", "Help Center": "Центр поддержки",
-          "© {year} Joomax Teknologi Indonesia. All Rights Reserved.": "© {year} Joomax Teknologi Indonesia. Все права защищены.",
-          "Create : fixs.arts studio": "Создано: fixs.arts studio",
-          "Email": "Эл. почта", "Website": "Сайт",
-          "Navigasi utama": "Главная навигация", "Buka menu": "Открыть меню", "Tutup menu": "Закрыть меню",
-          "Menu utama": "Главное меню", "Menu": "Меню", "Pilih bahasa": "Выберите язык"
-        },
-        ar: {
-          "Home": "الرئيسية", "Workspace": "مساحة العمل", "Creative": "الإبداع", "Gallery": "المعرض",
-          "Jadwal Kerja": "جدول العمل", "Lihat jadwal kerja tim": "عرض جدول عمل الفريق",
-          "Jadwal Piket": "جدول المناوبات", "Cek giliran piket harian": "تحقق من مناوبات اليوم",
-          "Pengajuan Izin": "طلب إجازة", "Ajukan izin dan sakit": "قدّم طلب إجازة أو إجازة مرضية",
-          "Image to Frame": "صورة إلى إطار", "Pasang frame Joomax ke foto": "أضف إطار Joomax إلى صورتك",
-          "Generate": "إنشاء", "Buat gambar produk marketplace": "أنشئ صور منتجات للأسواق الإلكترونية",
-          "Tools": "الأدوات", "Alat bantu kreatif": "أدوات مساعدة إبداعية",
-          "Dokumentasi": "التوثيق", "Foto kegiatan dan momen kantor": "صور الفعاليات ولحظات المكتب",
-          "Others": "أخرى", "Segera hadir": "قريباً",
-          "Company": "الشركة", "About Us": "من نحن", "Our Team": "فريقنا", "Contact": "اتصل بنا",
-          "Resource Center": "مركز الموارد", "Information": "معلومات",
-          "Privacy Policy": "سياسة الخصوصية", "Terms of Use": "شروط الاستخدام", "Help Center": "مركز المساعدة",
-          "© {year} Joomax Teknologi Indonesia. All Rights Reserved.": "© {year} Joomax Teknologi Indonesia. جميع الحقوق محفوظة.",
-          "Create : fixs.arts studio": "تصميم: fixs.arts studio",
-          "Email": "البريد الإلكتروني", "Website": "الموقع",
-          "Navigasi utama": "التنقل الرئيسي", "Buka menu": "فتح القائمة", "Tutup menu": "إغلاق القائمة",
-          "Menu utama": "القائمة الرئيسية", "Menu": "القائمة", "Pilih bahasa": "اختر اللغة"
-        }
-      }
+    // ---- Bahasa ---------------------------------------------------------------
+    // Kamus di atas (TEXT) dipakai header, footer, dan isi halaman website.
+    i18n: { default: "id", dict: DICT },
+
+    // ---- Terjemah isi halaman (body) -------------------------------------------
+    // Saat bahasa di footer diganti, teks di dalam website ikut berganti kalau ada di kamus.
+    // Kamus khusus satu website: JoomaxLayout.addDict({ en: { "Teks Indonesia": "English text" } })
+    // Cari teks yang belum punya terjemahan: buka console browser, ketik JoomaxLayout.scan()
+    page: {
+      enabled: true,   // false = isi halaman tidak ikut diterjemahkan
+      source: "id",    // bahasa teks asli di halaman
+      rtl: true        // Arab: seluruh halaman berarah kanan-ke-kiri
+      // root: "body",            // bagian halaman yang diterjemahkan
+      // skip: ".jangan-terjemah" // selector tambahan yang dilewati (atau pakai translate="no" / class="notranslate")
     },
 
     // ---- Footer -------------------------------------------------------------

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Demo Beta | Header & Footer Joomax</title>
+<link rel="icon" href="assets/icon-red.png">
+<style>
+  :root{box-sizing:border-box}
+  *,*::before,*::after{box-sizing:inherit}
+  body{margin:0;background:#fff;color:#141416;font:16px/1.6 "Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  main{width:min(840px,calc(100% - 40px));margin:0 auto;padding:56px 0 80px;min-height:60vh}
+  h1{margin:0 0 8px;font-size:clamp(1.9rem,4vw,2.5rem);line-height:1.15}
+  p{margin:0 0 12px;color:#6b6b75}
+  joomax-header:not(:defined){display:block;min-height:67px}
+</style>
+</head>
+<body>
+<joomax-header sticky></joomax-header>
+
+<main>
+  <h1>Demo versi beta</h1>
+  <p>Halaman ini memuat <code>joomax-layout.beta.config.js</code>, bukan config lengkap. Header hanya logo. Footer hanya logo, Information, sosial, dan bahasa. Link internal tidak ada sama sekali di halaman ini.</p>
+  <p>Coba ganti bahasa di footer: teksnya tetap berganti.</p>
+</main>
+
+<joomax-footer></joomax-footer>
+
+<script src="joomax-layout.beta.config.js"></script>
+<script src="joomax-layout.js"></script>
+</body>
+</html>

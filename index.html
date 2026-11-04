@@ -49,12 +49,22 @@
   <h2>Isi berbeda untuk satu website</h2>
   <p>Definisikan <code>window.JOOMAX_LAYOUT</code> sebelum script. Kalau sudah ada, config pusat tidak menimpanya, jadi muat <code>joomax-layout.js</code> saja.</p>
 
-  <h2>Bahasa</h2>
-  <p>Pemilih bahasa di footer menerjemahkan header dan footer: Indonesia, English, 中文, Русский, العربية. Kamusnya ada di <code>i18n.dict</code> pada config. Halaman bisa ikut berganti lewat event:</p>
-<pre>document.addEventListener("joomax:language", (e) =&gt; {
-  console.log(e.detail.code, e.detail.dir);   // "en" "ltr"
-});
-JoomaxLayout.setLanguage("zh");</pre>
+  <h2>Terjemah isi halaman</h2>
+  <p>Pemilih bahasa di footer (Indonesia, English, 中文, Русский, العربية) menerjemahkan header, footer, dan seluruh isi halaman. Teks di halaman dicocokkan persis dengan kamus, termasuk <code>placeholder</code>, <code>title</code>, <code>alt</code>, judul tab, dan konten yang ditambah lewat JavaScript. Lihat contohnya di <a href="translate.html">translate.html</a>.</p>
+<pre>&lt;!-- kamus khusus halaman, taruh setelah script joomax-layout.js --&gt;
+&lt;script&gt;
+  JoomaxLayout.addDict({
+    en: { "Jadwal hari ini": "Today's schedule" },
+    zh: { "Jadwal hari ini": "今日安排" }
+  });
+&lt;/script&gt;
+
+&lt;!-- kalimat dengan format: pakai data-i18n, isi kamus boleh HTML --&gt;
+&lt;p data-i18n="tips"&gt;Klik &lt;b&gt;tombol&lt;/b&gt; untuk mulai.&lt;/p&gt;
+
+&lt;!-- tidak diterjemahkan --&gt;
+&lt;span translate="no"&gt;Joomax&lt;/span&gt;</pre>
+  <p>Cari teks yang belum punya terjemahan: buka console browser lalu ketik <code>JoomaxLayout.scan()</code>.</p>
 
   <h2>Warna dan ukuran lewat CSS website</h2>
 <pre>:root{
