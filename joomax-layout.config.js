@@ -15,13 +15,13 @@
   // ---- Daftar link: tulis SEKALI di sini, dipakai di header dan footer ------
   const LINK = {
     home:     SITE + "/home/",
-    kerja:    "https://docs.google.com/spreadsheets/d/1OEg0_ey3srgomeU1Q1JEdI0h3PW93zb-mxHVxdZiuuY/edit?pli=1&gid=982571310#gid=982571310",
-    piket:    "https://docs.google.com/spreadsheets/d/1mXOwBjsoVrU3rJr9XWO6LnKoIOMe2PHVvUV5hc0y5Po/edit?gid=472399028#gid=472399028",
-    izin:     "https://forms.gle/SETnE5LfT6avQ5Q39",
+    kerja:    "https://designjoomax.github.io/home/#quick-access",
+    piket:    "https://designjoomax.github.io/home/#schedule",
+    izin:     "https://designjoomax.github.io/home/#quick-access",
     frame:    SITE + "/imagetoframe/",
     generate: SITE + "/generator/",
-    tools:    SITE + "/tools/",
-    gallery:  SITE + "/gallery/",
+    tools:    "https://designjoomax.github.io/home/#tools",
+    gallery:  "https://designjoomax.github.io/home/#gallery",
     // link sementara (ganti kalau halamannya sudah ada)
     others: "#", about: "#", team: "#", contact: "#", resource: "#", privacy: "#", terms: "#", help: "#"
   };
