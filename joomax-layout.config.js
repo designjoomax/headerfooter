@@ -22,9 +22,16 @@
     generate: SITE + "/generator/",
     tools:    "https://designjoomax.github.io/home/#tools",
     gallery:  "https://designjoomax.github.io/home/#gallery",
-    // link sementara (ganti kalau halamannya sudah ada)
-    others: "#", about: "#", team: "#", contact: "#", resource: "#", privacy: "#", terms: "#", help: "#"
-  };
+   // Link sementara (ganti kalau halamannya sudah ada)
+      others: "#",
+      about: "/home/About/",
+      team: "#",
+      contact: "#",
+      resource: "#",
+      privacy: "#",
+      terms: "#",
+      help: "#"
+      };
 
   // ---- Terjemahan: tulis SEKALI di sini, dipakai header, footer, dan isi halaman ----
   // Kunci = teks yang ditulis di menu/footer/halaman. Tiap baris WAJIB berisi 5 bahasa, urutannya:
